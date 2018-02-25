@@ -1,0 +1,31 @@
+<h1> Materials database </h1>
+<p><b> Search data </b></p>
+<form action="/search/" method="post">
+    {% csrf_token %}
+    {{ search_form.as_p }}
+    <input type="submit" value="Submit" />
+</form>
+<br><br>
+<p><b> Add data </b></p>
+<form action="/add/" method="post">
+    {% csrf_token %}
+    {{ add_form.as_p }}
+    <input type="submit" value="Submit" />
+    <!-- <input type="submit" value="Submit" onclick="SubmitForm();"/> -->
+</form>
+<!-- This was a template for attach file button
+</p>
+<form action="/upload/" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ csv_form.as_p }}
+    <input type="submit" value="Upload" />
+</form>
+</p>
+-->
+</p>
+Populate the database from data.csv file:<br>
+<form action="/upload/" method="post">
+    {% csrf_token %}
+    <input type="submit" value="Upload data.csv file" />
+</form>
+</p>

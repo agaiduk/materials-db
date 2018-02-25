@@ -1,0 +1,18 @@
+<table>
+    <tr>
+        <th>Formula</th>
+        <th>Property 1 name</th>
+        <th>Property 1 value</th>
+        <th>Property 2 name</th>
+        <th>Property 2 value</th>
+    </tr>
+    {% for item in query %}
+    <tr>
+        <td>{{ item.chemical_formula }}</td>
+        <td>{{ item.property1_name }}</td>
+        <td>{{ item.property1_value }}</td>
+        <td>{{ item.property2_name }}</td>
+        <td>{{ item.property2_value }}</td>
+    </tr>
+    {% endfor %}
+</table>
