@@ -1,2 +1,13 @@
-<p><b> Form for adding new materials to database. </b></p>
-
+<p><b> Add data </b></p>
+<form action="/input" method="post">
+    {% csrf_token %}
+    {{ add_form.as_p }}
+    <input type="submit" value="Submit" />
+</form>
+</p>
+<br>Populate the database from data.csv file:<br>
+<form action="/upload" method="post">
+    {% csrf_token %}
+    <input type="submit" value="Upload data.csv file" />
+</form>
+</p>

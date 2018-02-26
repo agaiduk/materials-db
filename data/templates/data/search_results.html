@@ -8,11 +8,7 @@
     </tr>
     {% for item in query %}
     <tr>
-        <td>{{ item.chemical_formula }}</td>
-        <td>{{ item.property1_name }}</td>
-        <td>{{ item.property1_value }}</td>
-        <td>{{ item.property2_name }}</td>
-        <td>{{ item.property2_value }}</td>
+        <td>{{ item.compound }}</td>
     </tr>
     {% endfor %}
 </table>
