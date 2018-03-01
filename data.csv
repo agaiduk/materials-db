@@ -1,5 +1,4 @@
 Chemical formula,Property 1 name,Property 1 value,Property 2 name,Property 2 value
-Al2O3,Density,3.987,Color,White
 Cd1I2,Band gap,3.19,Color,White
 Zr1S2,Band gap,1.68,Color,Violet
 Ga1Sb1,Band gap,0.812,Color,Light Gray
@@ -100,3 +99,5 @@ Sn1O2,Band gap,2.7,Color,Black
 Pb1O1,Band gap,3.18,Color,Red
 Ga2O3,Band gap,4.4,Color,White
 Ge1S2,Band gap,3.54,Color,Amber
+Al2O3,Density,3.987,Color,White
+H2O,Density,1,Color,Transparent,Band gap,8.7,High-frequency dielectric constant,1.77

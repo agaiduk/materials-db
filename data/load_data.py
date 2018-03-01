@@ -1,5 +1,7 @@
 import os
 import csv
+import tempfile
+import time
 from .models import Material
 
 
@@ -12,15 +14,25 @@ def valid_float(string):
         return False
 
 
-def csv_to_db(fname):
-    if os.path.isfile(fname) is False:
-        print(fname, "File does not exist")
-        return 1
-    with open(fname) as f:
+def csv_to_db(csv_file):
+    """
+    Load the in-memory file csv_file into the materials database
+    """
+    # Create temporary file and fill it with the uploaded csv data
+    cwd = os.getcwd()
+    with tempfile.TemporaryFile() as f_byte:
+        fname = f_byte.name
+
+        for chunk in csv_file.chunks():
+            f_byte.write(chunk)
+
+        # Now open the file and parse it into csv
+        f_byte.seek(0)
+        f = open(fname, "r")
         reader = csv.reader(f)
         row = next(reader)
         if row[0] == "Chemical formula":
-        # We have a correct header; process file further
+            # We have a correct header; process file further
             for row in reader:
                 n_fields = len(row)
                 if n_fields % 2 == 0:  # Error exit if the total number of fields is odd: One compound name & n properties (2*n + 1)
