@@ -14,7 +14,6 @@
     {% csrf_token %}
     {{ add_form.as_p }}
     <button type="submit" name="entry_type" value="add" > Submit </button>
-    <!-- <input type="submit" value="Submit" onclick="SubmitForm();"/> -->
 </form>
 <br><br>
 <p><b>Upload data from CSV file:</b></p>
@@ -24,10 +23,3 @@
     <button type="submit" name="entry_type" value="upload" > Upload </button>
 </form>
 </p>
-<!-- </p>
-Populate the database from data.csv file:<br>
-<form action="/upload/" method="post">
-    {% csrf_token %}
-    <input type="submit" value="Upload data.csv file" />
-</form>
-</p> -->
