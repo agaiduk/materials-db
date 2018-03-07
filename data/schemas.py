@@ -57,26 +57,10 @@ schemas['add'] = {
 schemas['search'] = {
   "type": "object",
   "properties": {
-    "compound": {
-      "type": "object",
-      "properties": {
-        "logic": {
-          "type": "string",
-          "title": "Schema for compound name logic",
-          "default": "matches"
-        },
-        "value": {
-          "type": "string",
-          "title": "Schema for compound name",
-          "default": "",
-          "minLength": 1
-        }
-      },
-      "additionalProperties": False,
-      "required": [
-        "logic",
-        "value"
-      ]
+    "search": {
+      "type": "string",
+      "title": "Database full-text search bar",
+      "default": ""
     },
     "properties": {
       "type": "array",

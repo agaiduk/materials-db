@@ -23,14 +23,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '=l9phf720%0(uuerqyk=8h=5u%a6+t_)dl-j-$-&=c56b$2t(7'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+#DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+#ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'haystack',
     'data.apps.DataConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -81,6 +84,20 @@ DATABASES = {
     }
 }
 
+# Haystack configuration
+#TEMPLATE_DIRS = (
+#    os.path.join(BASE_DIR, 'templates/'),
+#)
+TEMPLATE_DIRS = (
+    '/home/agaiduk/',
+)
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'materials_db.search_backends.CustomWhooshEngine',
+        'PATH': os.path.join(BASE_DIR, 'whoosh_index'),
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators

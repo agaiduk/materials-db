@@ -1,7 +1,6 @@
 from .models import Material, Property
 from rest_framework import serializers
 
-
 class PropertySerializer(serializers.ModelSerializer):
     class Meta:
         model = Property

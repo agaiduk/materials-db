@@ -12,7 +12,7 @@ def index(request):
     '''
     Web interface to the materials database API
     '''
-    def render_index(message=None):
+    def render_index(message=None, status=None):
         '''
         Serve the index webpage with an optional message
 
@@ -29,7 +29,7 @@ def index(request):
         search_form = JSONForm()
         add_form = JSONForm()
         file_form = DataUploadForm()
-        return render(request, 'data/index.html', {'search_form': search_form, 'add_form': add_form, 'file_form': file_form, 'message': message})
+        return render(request, 'data/index.html', {'search_form': search_form, 'add_form': add_form, 'file_form': file_form, 'message': message}, status=status)
 
     if request.method == 'GET':
         # Render the webpage with empty search and add forms, and a file upload button
@@ -65,11 +65,11 @@ def index(request):
             form = DataUploadForm(request.POST, request.FILES)
             if not form.is_valid():
                 return render_index('Upload failed.')
-            csv_exit_code = db.db_from_csv(request.FILES['file'])
-            if csv_exit_code == 0:
+            csv_error_message = db.db_from_csv(request.FILES['file'])
+            if csv_error_message == None:
                 return render_index('File successfully loaded into the database.')
             else:
-                return render_index('Error reading file into the database.')
+                return render_index(csv_error_message, status=400)
 
         # This shouldn't normally happen, unless there's a bug in the code...
         else:
@@ -102,7 +102,10 @@ def add(request):
         for alloy in query_dictionary:  # query_dictionary is a list of materials
             # Initialize a material
             material = Material(compound=alloy["compound"])
-            material.save()
+            try:
+                material.save()
+            except ValueError:
+                return JsonResponse({"error": "You provided an incorrect chemical formula of the compound"}, status=400)
             for compound_property in alloy["properties"]:
                 # Add the properties of the material
                 propertyName = compound_property["propertyName"]
