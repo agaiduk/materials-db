@@ -11,8 +11,7 @@ from data.schemas import schemas
 def db_from_csv(csv_file):
     '''
     Load in-memory file csv_file into materials database
-    This function does simple checks for the csv data file format but be careful using it
-    (This functionality was adeed to populate the database quickly)
+    This function does simple checks for the csv data file format
 
     Parameters
     ----------
@@ -27,8 +26,6 @@ def db_from_csv(csv_file):
     str
                 Error message to be passed to the upper level subroutine
     '''
-    # Create temporary file and fill it with the uploaded csv data
-    print('csv file size:',csv_file.size)
     if csv_file.multiple_chunks():
         return "Uploaded file size ({:.2f} Mb) is too large - should be less than 2.5 Mb.".format(csv_file.size/(1024*1024))
 
@@ -154,10 +151,13 @@ def query_from_dictionary(query_dictionary):
     '''
     # Since input json conforms to the schema, parse it without looking back...
     query = Material.objects
+    # First, apply whoosh's raw search through haystack API
     if "search" in query_dictionary:
         haystack_query_compound = SearchQuerySet().raw_search(query_dictionary["search"])
+        # Convert haystack search query to django search query
         query_compound = Material.objects.filter(pk__in=[material.object.pk for material in haystack_query_compound])
     if "properties" in query_dictionary:
+        # Now filter by property values
         for compound_property in query_dictionary["properties"]:
             property_name = compound_property["name"]
             property_value = compound_property["value"]

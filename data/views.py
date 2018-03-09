@@ -20,6 +20,8 @@ def index(request):
         ----------
         message : str, optional
                     Generate an index webpage with a message
+        status  : int, optional
+                    status of the request, for generating errors
 
         Returns
         -------
@@ -83,7 +85,7 @@ def add(request):
     Parameters
     ----------
     request : Http request
-                It accepts a request containing json and returns json with result or an error message
+                Request containing json for adding materials to the database
 
     Returns
     -------
@@ -104,7 +106,7 @@ def add(request):
             material = Material(compound=alloy["compound"])
             try:
                 material.save()
-            except ValueError or IndexError:
+            except (ValueError, IndexError):
                 return JsonResponse({"error": "Chemical formula \"{}\" is incorrect (must follow pyEQL syntax)".format(alloy["compound"])}, status=400)
             for compound_property in alloy["properties"]:
                 # Add the properties of the material
@@ -114,7 +116,7 @@ def add(request):
             # Save the material again to update the csv field, needed for search indexing
             try:
                 material.save()
-            except ValueError or IndexError:
+            except (ValueError, IndexError):
                 return JsonResponse({"error": "Chemical formula \"{}\" is incorrect (must follow pyEQL syntax)".format(alloy["compound"])}, status=400)
 
         # If success, return just added materials as a json
@@ -125,12 +127,12 @@ def add(request):
 
 def search(request):
     '''
-    API for adding material to the database
+    API for searching material in the database
 
     Parameters
     ----------
     request : Http request
-                It accepts a request containing json and returns json with result or an error message
+                Request containing json for querying the database
 
     Returns
     -------
@@ -142,13 +144,13 @@ def search(request):
         query_dictionary = db.json_to_dictionary(request.body, request_type='search')
         # If the result of the last operation is a string rather than dict
         # (error message), send a JsonResoponse containing this string
-        if type(query_dictionary) == str:
+        if isinstance(query_dictionary, str):
             return JsonResponse({"error": query_dictionary}, status=400)
 
         # If everything went well, serialize the json, compile the search query,
         # and make the list of materials matching the request
         query = db.query_from_dictionary(query_dictionary)
-        if type(query) == str:
+        if isinstance(query, str):
             return JsonResponse({"error": query}, status=400)
 
         search_result = db.query_to_dictionary(query)
