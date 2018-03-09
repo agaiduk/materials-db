@@ -1,2 +1,2 @@
-{{ object.csv }}
-{{ object.elements }}
+{% load data_filters %}
+{{ object.csv|add:","|add:object.elements|commas_to_spaces }}

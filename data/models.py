@@ -57,7 +57,7 @@ class Property(models.Model):
     compound = models.ForeignKey(Material, related_name='properties', on_delete=models.CASCADE)
     propertyName = models.CharField('Property name', max_length=100)
     propertyValue = models.CharField('Property value', max_length=100)
-    # Store the numerical value of the property if it is representable as a number
+    # Store the numerical value of the property for numerical comparison
     propertyValueFloat = models.FloatField(default=None, null=True, blank=True)
 
     class Meta:

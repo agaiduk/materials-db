@@ -1,0 +1,32 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[packages]
+
+certifi = "==2018.1.18"
+chardet = "==3.0.4"
+Django = "==2.0.3"
+django-haystack = {git = "https://github.com/mpauly/django-haystack.git"}
+djangorestframework = "==3.7.7"
+idna = "==2.6"
+jsonschema = "==2.6.0"
+numpy = "==1.14.1"
+Pint = "==0.8.1"
+pyeql = "==0.4"
+pytz = "==2018.3"
+requests = "==2.18.4"
+scipy = "==1.0.0"
+"urllib3" = "==1.22"
+Whoosh = "==2.7.4"
+gunicorn = "*"
+django-heroku = "*"
+dj_database_url = "*"
+psycopg2-binary = "*"
+
+
+[dev-packages]
+

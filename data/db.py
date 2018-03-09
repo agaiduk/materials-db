@@ -1,6 +1,4 @@
-import csv
 import json
-import tempfile
 from data.models import Material
 from data.tools import valid_float, operator_type, valid_operator_type
 from haystack.query import SearchQuerySet
@@ -24,39 +22,49 @@ def db_from_csv(csv_file):
 
     Returns
     -------
-    int
-                Exit codes:
-                0 : success
-                1 : first line of the csv does not start with "Chemical formula"
+    None
+                If everything was OK
+    str
+                Error message to be passed to the upper level subroutine
     '''
     # Create temporary file and fill it with the uploaded csv data
-    with tempfile.TemporaryFile() as f_byte:
-        fname = f_byte.name
+    print('csv file size:',csv_file.size)
+    if csv_file.multiple_chunks():
+        return "Uploaded file size ({:.2f} Mb) is too large - should be less than 2.5 Mb.".format(csv_file.size/(1024*1024))
 
-        for chunk in csv_file.chunks():
-            f_byte.write(chunk)
+    try:
+        f = csv_file.read().decode("utf-8")
+    except UnicodeDecodeError:
+        return "Incorrect file format"
+    lines = f.split('\n')
 
-        # Now open the file for reading and parse it into csv
-        f_byte.seek(0)
-        f = open(fname, "r")
-        reader = csv.reader(f)
-        row = next(reader)
-        # Check if we have correct header
-        if not row[0] == "Chemical formula":
-            return "Incorrect csv file format"
-        for row in reader:
-            n_fields = len(row)
-            # Skip the record if the total number of fields is odd:
-            # Supposed to be one compound name & n properties (2*n + 1)
-            if n_fields % 2 == 0:
-                continue
-            material = Material(compound=row[0])
-            try:
-                material.save()
-            except ValueError:
-                return "You provided an incorrect chemical formula of the compound"
-            [material.properties.create(propertyName=row[n], propertyValue=row[n+1]) for n in range(1,n_fields-1,2)]
-        return
+    # Check if we have correct header; delete it if we do; return an error if we don't
+    if not lines[0].startswith("Chemical formula,"):
+        return "Incorrect csv file format; first line is: \"{}\"".format(lines[0])
+    else:
+        del lines[0]
+
+    for line in lines:
+        fields = line.strip().split(',')
+
+        n_fields = len(fields)
+        # Skip the record if the total number of fields is odd:
+        # Supposed to be one compound name & n properties (2*n + 1)
+        # This also takes care of possible dos line endings when you end up with empty string
+        if n_fields < 2 or n_fields % 2 == 0:
+            continue
+        material = Material(compound=fields[0])
+        try:
+            material.save()
+        except (ValueError, IndexError):
+            return "Chemical formula \"{}\" is incorrect (must follow pyEQL syntax)".format(fields[0])
+        [material.properties.create(propertyName=fields[n], propertyValue=fields[n+1]) for n in range(1,n_fields-1,2)]
+        # Save the material again to update the csv field, needed for search indexing
+        try:
+            material.save()
+        except (ValueError, IndexError):
+            return "Chemical formula \"{}\" is incorrect (must follow pyEQL syntax)".format(fields[0])
+    return
 
 
 def json_to_dictionary(request_body, request_type):

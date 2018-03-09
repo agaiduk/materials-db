@@ -104,13 +104,19 @@ def add(request):
             material = Material(compound=alloy["compound"])
             try:
                 material.save()
-            except ValueError:
-                return JsonResponse({"error": "You provided an incorrect chemical formula of the compound"}, status=400)
+            except ValueError or IndexError:
+                return JsonResponse({"error": "Chemical formula \"{}\" is incorrect (must follow pyEQL syntax)".format(alloy["compound"])}, status=400)
             for compound_property in alloy["properties"]:
                 # Add the properties of the material
                 propertyName = compound_property["propertyName"]
                 propertyValue = compound_property["propertyValue"]
                 material.properties.create(propertyName=propertyName, propertyValue=propertyValue)
+            # Save the material again to update the csv field, needed for search indexing
+            try:
+                material.save()
+            except ValueError or IndexError:
+                return JsonResponse({"error": "Chemical formula \"{}\" is incorrect (must follow pyEQL syntax)".format(alloy["compound"])}, status=400)
+
         # If success, return just added materials as a json
         return JsonResponse(query_dictionary, safe=False)
     else:
