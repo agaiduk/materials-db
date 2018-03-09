@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "1cae1f06c2524cbcad48b47fa0433ba81f294bc14732536a348ab154177281fd"
+            "sha256": "efad370a2b3b6597e1a8ca4433423d419d5f1a8cee41b733edaec8fafef15e66"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
@@ -56,7 +56,11 @@
             "version": "==2.0.3"
         },
         "django-haystack": {
-            "git": "https://github.com/mpauly/django-haystack.git"
+            "hashes": [
+                "sha256:5951a2f4059ee6d3f142186ea63cab65b28d7a758c969506a564553e479ceab4",
+                "sha256:579cd2080f7ad508e909a46c027078e278aeebd133973c1c4efcf0dc57d85c10"
+            ],
+            "version": "==2.8.0"
         },
         "django-heroku": {
             "hashes": [
