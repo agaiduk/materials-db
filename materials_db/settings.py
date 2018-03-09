@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 import os
 import django_heroku
 import dj_database_url
+from urlparse import urlparse
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -75,15 +76,31 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'materials_db.wsgi.application'
 
-# Haystack configuration
 
-HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+es = urlparse(os.environ.get('SEARCHBOX_URL') or 'http://127.0.0.1:9200/')
+port = es.port or 80
+
+# Haystack configuration with Elasticsearch
+
 HAYSTACK_CONNECTIONS = {
     'default': {
-        'ENGINE': 'materials_db.search_backends.CustomWhooshEngine',
-        'PATH': os.path.join(BASE_DIR, 'index'),
-    }
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': es.scheme + '://' + es.hostname + ':' + str(port),
+        'INDEX_NAME': 'documents',
+    },
 }
+
+if es.username:
+    HAYSTACK_CONNECTIONS['default']['KWARGS'] = {"http_auth": es.username + ':' + es.password}
+
+
+#HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+#HAYSTACK_CONNECTIONS = {
+#    'default': {
+#        'ENGINE': 'materials_db.search_backends.CustomWhooshEngine',
+#        'PATH': os.path.join(BASE_DIR, 'index'),
+#    }
+#}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators

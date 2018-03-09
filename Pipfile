@@ -10,7 +10,7 @@ name = "pypi"
 certifi = "==2018.1.18"
 chardet = "==3.0.4"
 Django = "==2.0.3"
-django-haystack = {git = "https://github.com/mpauly/django-haystack.git"}
+django-haystack = "==2.8.0"
 djangorestframework = "==3.7.7"
 idna = "==2.6"
 jsonschema = "==2.6.0"
