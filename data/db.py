@@ -155,7 +155,7 @@ def query_from_dictionary(query_dictionary):
     if "search" in query_dictionary:
         haystack_query_compound = SearchQuerySet().raw_search(query_dictionary["search"])
         # Convert haystack search query to django search query
-        query_compound = Material.objects.filter(pk__in=[material.object.pk for material in haystack_query_compound])
+        query = query.intersection(Material.objects.filter(pk__in=[material.object.pk for material in haystack_query_compound]))
     if "properties" in query_dictionary:
         # Now filter by property values
         for compound_property in query_dictionary["properties"]:
@@ -177,7 +177,7 @@ def query_from_dictionary(query_dictionary):
                 return "Incorrect search operator"
             else:
                 return "Incorrect combination of the property value and operator"
-    return query.intersection(query_compound)
+    return query
 
 
 def query_to_dictionary(query):
