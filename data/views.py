@@ -50,7 +50,7 @@ def index(request):
             # Prepare and submit POST request to /data/add or /data/search
             query = form.cleaned_data['entry']
             hostname = request.get_host()
-            url = request.scheme + "://" + hostname + reverse(query_type)
+            url = request.scheme + '://' + hostname + reverse(query_type)
             response = requests.post(url, data=query)
             # Check if the response was successful, then serve
             # the main page again or display the search results
@@ -62,16 +62,13 @@ def index(request):
                 return JsonResponse(response.json(), json_dumps_params={'indent': 2}, safe=False)
 
         # Handle file uploads
-        elif query_type == "upload":
+        elif query_type == 'upload':
             # Populate database from the csv file
             form = DataUploadForm(request.POST, request.FILES)
             if not form.is_valid():
                 return render_index('Upload failed.')
-            csv_error_message = db.db_from_csv(request.FILES['file'])
-            if csv_error_message == None:
-                return render_index('File successfully loaded into the database.')
-            else:
-                return render_index(csv_error_message, status=400)
+            message, status = db.db_from_csv(request.FILES['file'])
+            return render_index(message=message, status=status)
 
         # This shouldn't normally happen, unless there's a bug in the code...
         else:
@@ -98,25 +95,21 @@ def add(request):
 
         # If the result of the last operation is a string (error message),
         # send a JsonResoponse containing the string
-        if type(query_dictionary) == str:
+        if isinstance(query_dictionary, str):
             return JsonResponse({"error": query_dictionary}, status=400)
 
         for alloy in query_dictionary:  # query_dictionary is a list of materials
             # Initialize a material
             material = Material(compound=alloy["compound"])
-            try:
-                material.save()
-            except (ValueError, IndexError):
+            material_saved = db.save_to_db(material)
+            if not material_saved:
                 return JsonResponse({"error": "Chemical formula \"{}\" is incorrect (must follow pyEQL syntax)".format(alloy["compound"])}, status=400)
-            for compound_property in alloy["properties"]:
-                # Add the properties of the material
-                propertyName = compound_property["propertyName"]
-                propertyValue = compound_property["propertyValue"]
-                material.properties.create(propertyName=propertyName, propertyValue=propertyValue)
+            [material.properties.create(
+                propertyName=compound_property["propertyName"], propertyValue=compound_property["propertyValue"])
+                for compound_property in alloy["properties"]]
             # Save the material again to update the csv field, needed for search indexing
-            try:
-                material.save()
-            except (ValueError, IndexError):
+            material_saved = db.save_to_db(material)
+            if not material_saved:
                 return JsonResponse({"error": "Chemical formula \"{}\" is incorrect (must follow pyEQL syntax)".format(alloy["compound"])}, status=400)
 
         # If success, return just added materials as a json

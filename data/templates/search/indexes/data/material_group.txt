@@ -1,0 +1,2 @@
+{% load data_filters %}
+{{ object.groups|commas_to_spaces }}

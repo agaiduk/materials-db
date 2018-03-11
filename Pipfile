@@ -20,12 +20,12 @@ pyeql = "==0.4"
 pytz = "==2018.3"
 requests = "==2.18.4"
 scipy = "==1.0.0"
-"urllib3" = "==1.22"
-Whoosh = "==2.7.4"
+urllib3 = "==1.22"
 gunicorn = "*"
 django-heroku = "*"
 dj_database_url = "*"
 psycopg2-binary = "*"
+elasticsearch = "==2.4.1"
 
 [dev-packages]
 

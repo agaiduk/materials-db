@@ -1,0 +1,2 @@
+{% load data_filters %}
+{{ object.periods|commas_to_spaces }}

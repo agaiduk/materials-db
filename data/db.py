@@ -8,6 +8,28 @@ from jsonschema.exceptions import ValidationError
 from data.schemas import schemas
 
 
+def save_to_db(instance):
+    '''
+    bool function to save an instance of the model class to the database
+
+    Parameters
+    ----------
+    instance : instance of a model class, required
+
+    Returns
+    -------
+    bool
+            True : the instance has been added to the db
+            False : exceptions were raised for whatever reason
+    '''
+    try:
+        instance.save()
+        return True
+    # If the compound cannot be added (e.g. pyEQL)
+    except (ValueError, IndexError):
+        return False
+
+
 def db_from_csv(csv_file):
     '''
     Load in-memory file csv_file into materials database
@@ -21,10 +43,8 @@ def db_from_csv(csv_file):
 
     Returns
     -------
-    None
-                If everything was OK
-    str
-                Error message to be passed to the upper level subroutine
+    (str, int)
+                Tuple consisting of the exit message & Http status code
     '''
     if csv_file.multiple_chunks():
         return "Uploaded file size ({:.2f} Mb) is too large - should be less than 2.5 Mb.".format(csv_file.size/(1024*1024))
@@ -32,36 +52,36 @@ def db_from_csv(csv_file):
     try:
         f = csv_file.read().decode("utf-8")
     except UnicodeDecodeError:
-        return "Incorrect file format"
+        return "Incorrect file format", 400
     lines = f.split('\n')
 
     # Check if we have correct header; delete it if we do; return an error if we don't
     if not lines[0].startswith("Chemical formula,"):
-        return "Incorrect csv file format; first line is: \"{}\"".format(lines[0])
+        return "Incorrect csv file format; first line is: \"{}\"".format(lines[0]), 400
     else:
         del lines[0]
 
+    materials_added = 0
     for line in lines:
         fields = line.strip().split(',')
 
         n_fields = len(fields)
         # Skip the record if the total number of fields is odd:
         # Supposed to be one compound name & n properties (2*n + 1)
-        # This also takes care of possible dos line endings when you end up with empty string
+        # "n_fields < 2" takes care of possible dos line endings when you end up with an empty string
         if n_fields < 2 or n_fields % 2 == 0:
             continue
         material = Material(compound=fields[0])
-        try:
-            material.save()
-        except (ValueError, IndexError):
-            return "Chemical formula \"{}\" is incorrect (must follow pyEQL syntax)".format(fields[0])
+        material_saved = save_to_db(material)
+        if not material_saved:
+            continue
         [material.properties.create(propertyName=fields[n], propertyValue=fields[n+1]) for n in range(1,n_fields-1,2)]
         # Save the material again to update the csv field, needed for search indexing
-        try:
-            material.save()
-        except (ValueError, IndexError):
-            return "Chemical formula \"{}\" is incorrect (must follow pyEQL syntax)".format(fields[0])
-    return
+        material_saved = save_to_db(material)
+        if not material_saved:
+            continue
+        materials_added += 1
+    return "{} out of {} materials added to the database".format(materials_added, len(lines)), 200
 
 
 def json_to_dictionary(request_body, request_type):
@@ -149,13 +169,16 @@ def query_from_dictionary(query_dictionary):
     -------
     Material model class
     '''
-    # Since input json conforms to the schema, parse it without looking back...
     query = Material.objects
-    # First, apply whoosh's raw search through haystack API
+    # First, apply the raw search filter through haystack API
+    # Since input json conforms to the schema, parse it without further checks
     if "search" in query_dictionary:
-        haystack_query_compound = SearchQuerySet().raw_search(query_dictionary["search"])
+        search_query = SearchQuerySet().raw_search(query_dictionary["search"])
         # Convert haystack search query to django search query
-        query = query.intersection(Material.objects.filter(pk__in=[material.object.pk for material in haystack_query_compound]))
+        try:
+            query = Material.objects.filter(pk__in=[material.object.pk for material in search_query])
+        except AttributeError:  # compounds were found in the index but not in database
+            return "Search index is out of sync with the database"
     if "properties" in query_dictionary:
         # Now filter by property values
         for compound_property in query_dictionary["properties"]:
