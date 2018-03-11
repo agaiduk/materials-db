@@ -81,7 +81,7 @@ def db_from_csv(csv_file):
         if not material_saved:
             continue
         materials_added += 1
-    return "{} out of {} materials added to the database".format(materials_added, len(lines)), 200
+    return "{} materials added to the database".format(materials_added), 200
 
 
 def json_to_dictionary(request_body, request_type):

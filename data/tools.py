@@ -38,7 +38,8 @@ def operator_type(operator):
             If the operator name obtained from user has not been recognized
     '''
     db_operators = {
-        ("eq", "==", "=", "match", "matches"): "iexact",
+        ("eq", "==", "=", "match", "matches", "exact"): "exact",
+        ("ieq", "imatch", "imatches", "iexact"): "iexact",
         ("contain", "contains", "contained", "in"): "icontains",
         (">", "gt", "more"): "gt",
         (">=", "gte", "ge"): "gte",
@@ -68,8 +69,8 @@ def valid_operator_type(operator, data_type):
     bool
             True/False
     '''
-    string_operators = ["iexact", "icontains"]
-    float_operators = ["iexact", "gt", "gte", "lt", "lte"]
+    string_operators = ["exact", "iexact", "icontains"]
+    float_operators = ["exact", "gt", "gte", "lt", "lte"]
     # Check if the function is called properly
     if data_type not in [str, float]:
         return False
