@@ -61,16 +61,21 @@ def db_from_csv(csv_file):
     else:
         del lines[0]
 
+    materials_total = 0
     materials_added = 0
     for line in lines:
         fields = line.strip().split(',')
 
         n_fields = len(fields)
+        # take care of possible dos line endings when you end up with an empty string
+        if n_fields < 2 and fields[0] == '':
+            continue
+        materials_total += 1
         # Skip the record if the total number of fields is odd:
         # Supposed to be one compound name & n properties (2*n + 1)
-        # "n_fields < 2" takes care of possible dos line endings when you end up with an empty string
-        if n_fields < 2 or n_fields % 2 == 0:
+        if n_fields % 2 == 0:
             continue
+
         material = Material(compound=fields[0])
         material_saved = save_to_db(material)
         if not material_saved:
@@ -81,7 +86,8 @@ def db_from_csv(csv_file):
         if not material_saved:
             continue
         materials_added += 1
-    return "{} materials added to the database".format(materials_added), 200
+
+    return "{} of {} materials added to the database".format(materials_added, materials_total), 200
 
 
 def json_to_dictionary(request_body, request_type):
