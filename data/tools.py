@@ -40,11 +40,12 @@ def operator_type(operator):
     db_operators = {
         ("eq", "==", "=", "match", "matches", "exact"): "exact",
         ("ieq", "imatch", "imatches", "iexact"): "iexact",
-        ("contain", "contains", "contained", "in"): "icontains",
-        (">", "gt", "more"): "gt",
+        ("contain", "contains", "contained"): "contains",
+        ("icontain", "icontains", "icontained", "in"): "icontains",
+        (">", "gt", "more", "greater"): "gt",
         (">=", "gte", "ge"): "gte",
         ("<", "lt", "less"): "lt",
-        ("<=", "=<" "lte", "le"): "lte"
+        ("<=", "=<", "lte", "le"): "lte"
     }
     for key in db_operators:
         if operator in key:
@@ -69,7 +70,7 @@ def valid_operator_type(operator, data_type):
     bool
             True/False
     '''
-    string_operators = ["exact", "iexact", "icontains"]
+    string_operators = ["exact", "iexact", "contains", "icontains"]
     float_operators = ["exact", "gt", "gte", "lt", "lte"]
     # Check if the function is called properly
     if data_type not in [str, float]:
